@@ -1,0 +1,93 @@
+import pyttsx3
+
+#Text to speech set up 
+engine = pyttsx3.init()
+
+def speak(text):
+    """Convert text to speech"""
+    engine.say(text)
+    engine.runAndWait()
+
+#Vending machine dictionary 
+items = {
+    "D1": {"name": "Cola", "price": 1.50, "category": "Drinks"},
+    "D2": {"name": "Water", "price": 1.00, "category": "Drinks"},
+    "D3": {"name": "Hot Chocolate", "price": 2.00, "category": "Hot Drinks"},
+    "S1": {"name": "Chocolate Bar", "price": 1.20, "category": "Snacks"},
+    "S2": {"name": "Crisps", "price": 1.30, "category": "Snacks"},
+    "S3": {"name": "Cookies", "price": 1.10, "category": "Snacks"}
+}
+
+# Display menu for the dictionary 
+def display_menu():
+    
+    """Display vending machine menu by category"""
+    print("\n--- VENDING MACHINE MENU ---")
+    speak("Welcome to the vending machine. Please choose an item.")
+#Creates a set of ategories from the items dictionary
+    categories = set(item["category"] for item in items.values())
+#Displays item in each category
+    for category in categories:
+        print(f"\n{category}:")
+        for code, item in items.items():
+            if item["category"] == category:
+                print(f"  {code} - {item['name']} (£{item['price']:.2f})")
+
+
+def get_item():
+   
+    """Get valid item code from user"""
+    while True:
+        code = input("\nEnter item code: ").upper()#User enters a code thats labeled in the dictionary
+        if code in items:#lets it repeat if the user doesnt input a code in the dictionary until he inputa a proper code
+            return code
+        else:
+            print("Invalid code. Please try again.")
+            speak("Invalid code. Please try again.")
+
+
+def process_payment(price):
+    """Handle money input and return change"""
+    while True:
+        try:
+            #asks the user for money to buy the item they chose
+            money = float(input(f"Insert money (${price:.2f} required): $"))
+            if money >= price:
+                return money - price
+            else:# this makes sure the user inserts enough money
+                print("Not enough money inserted.")
+                speak("Not enough money inserted.")
+        except ValueError: #handles errors when user doesnt input a number
+            print("Please enter a valid amount.")
+            speak("Please enter a valid amount.")
+
+def vending_machine():
+    """Main vending machine loop"""
+    total_spent = 0.0 #shows how much the user spend depending on what they bought
+
+    while True:
+        display_menu() #displays the menu
+        code = get_item() #gets the item selected by the user 
+        item = items[code]
+
+        print(f"\nYou selected {item['name']} (${item['price']:.2f})")
+        speak(f"You selected {item['name']}")
+#Processes the payment and calculates the left over change
+        change = process_payment(item["price"])
+        total_spent += item["price"]
+#informs and prints that the item has been dispensed 
+        print(f"\nDispensing {item['name']}...")
+        speak(f"Dispensing {item['name']}")
+#informs and prints their leftover change
+        print(f"Change returned: ${change:.2f}")
+        speak(f"Your change is {change:.2f} dollars")
+
+# Ask if user wants another item
+        another = input("\nWould you like to buy another item? (y/n): ").lower()
+        if another != 'y':
+            print(f"\nThank you! Total spent: ${total_spent:.2f}")
+            speak("Thank you for using the vending machine. Goodbye.")
+            break
+
+#Starts the vending machine
+vending_machine()
